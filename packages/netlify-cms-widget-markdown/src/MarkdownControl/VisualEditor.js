@@ -5,7 +5,7 @@ import styled, { cx } from 'react-emotion';
 import { get, isEmpty, debounce } from 'lodash';
 import { List } from 'immutable';
 import { Value, Document, Block, Text } from 'slate';
-import { Editor as Slate } from 'slate-react';
+import { Editor as Slate, getEventTransfer } from 'slate-react';
 import { slateToMarkdown, markdownToSlate, htmlToSlate } from '../serializers';
 import Toolbar from '../MarkdownControl/Toolbar';
 import { renderNode, renderMark } from './renderers';
@@ -55,13 +55,17 @@ export default class Editor extends React.Component {
     return !this.state.value.equals(nextState.value);
   }
 
-  handlePaste = (e, data, change) => {
-    if (data.type !== 'html' || data.isShift) {
-      return;
-    }
-    const ast = htmlToSlate(data.html);
-    const doc = Document.fromJSON(ast);
-    return change.insertFragment(doc);
+  handlePaste = (event, editor, next) => {
+    const transfer = getEventTransfer(event);
+
+    if (transfer.type != 'html') return;
+
+    const ast = htmlToSlate(transfer.html);
+    const document = Document.fromJSON(ast);
+
+    editor.insertFragment(document);
+
+    return false;
   };
 
   selectionHasMark = type => this.state.value.activeMarks.some(mark => mark.type === type);
