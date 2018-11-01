@@ -71,6 +71,11 @@ export default function remarkUnwrapInvalidNest() {
 
     const childrenBefore = parent.children.slice(0, splitChildIndex);
     const childrenAfter = parent.children.slice(splitChildIndex + 1);
+
+    if (childrenAfter[0] && childrenAfter[0].type === "break" && !childrenAfter[0].children) {
+      childrenAfter.shift();
+    }
+
     const nodeBefore = !isEmpty(childrenBefore) && { ...parent, children: childrenBefore };
     const nodeAfter = !isEmpty(childrenAfter) && { ...parent, children: childrenAfter };
 
